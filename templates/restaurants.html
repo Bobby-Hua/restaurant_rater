@@ -1,0 +1,27 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+    ul {
+    list-style-type: none;
+    }
+  </style>
+  
+  <body>
+  
+   {% for r in res %}
+
+    <ul>
+
+    <li>Name: {{r.res_name}}</li>
+
+    <li>Rating: {{r.star }}</li>
+
+    </ul>
+
+   {% endfor %}
+   
+</body>
+</html>
