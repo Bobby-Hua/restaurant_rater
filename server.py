@@ -13,6 +13,7 @@ import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response
+import query
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -29,7 +30,7 @@ app = Flask(__name__, template_folder=tmpl_dir)
 #
 #     DATABASEURI = "postgresql://zy2431:123123@34.73.36.248/project1"
 #
-DATABASEURI = "postgresql://user:password@34.73.36.248/project1" # Modify this with your own credentials you received from Joseph!
+DATABASEURI = "postgresql://hz2653:787876@34.73.36.248/project1" # Modify this with your own credentials you received from Joseph!
 
 
 #
@@ -91,28 +92,31 @@ def teardown_request(exception):
 #
 @app.route('/')
 def index():
-  """
-  request is a special object that Flask provides to access web request information:
+    return dashboard()
+"""
+request is a special object that Flask provides to access web request information:
 
-  request.method:   "GET" or "POST"
-  request.form:     if the browser submitted a form, this contains the data in the form
-  request.args:     dictionary of URL arguments, e.g., {a:1, b:2} for http://localhost?a=1&b=2
+request.method:   "GET" or "POST"
+request.form:     if the browser submitted a form, this contains the data in the form
+request.args:     dictionary of URL arguments, e.g., {a:1, b:2} for http://localhost?a=1&b=2
 
-  See its API: https://flask.palletsprojects.com/en/1.1.x/api/#incoming-request-data
-  """
+See its API: https://flask.palletsprojects.com/en/1.1.x/api/#incoming-request-data
+"""
 
   # DEBUG: this is debugging code to see what request looks like
-  print(request.args)
+  #print(request.args)
 
 
   #
   # example of a database query
   #
-  cursor = g.conn.execute("SELECT name FROM test")
-  names = []
-  for result in cursor:
-    names.append(result['name'])  # can also be accessed using result[0]
-  cursor.close()
+'''
+cursor = g.conn.execute("SELECT name FROM test")
+names = []
+for result in cursor:
+  names.append(result['name'])  # can also be accessed using result[0]
+cursor.close()
+'''
 
   #
   # Flask uses Jinja templates, which is an extension to HTML where you can
@@ -140,14 +144,14 @@ def index():
   #     <div>{{n}}</div>
   #     {% endfor %}
   #
-  context = dict(data = names)
+  #context = dict(data = names)
 
 
   #
   # render_template looks in the templates/ folder for files.
   # for example, the below file reads template/index.html
   #
-  return render_template("index.html", **context)
+  #return render_template("index.html", **context)
 
 #
 # This is an example of a different path.  You can see it at:
@@ -157,12 +161,44 @@ def index():
 # Notice that the function name is another() rather than index()
 # The functions for each app.route need to have different names
 #
-@app.route('/another')
-def another():
-  return render_template("another.html")
+def dashboard():
+    
+    #find all cities
+    cursor = query.all_city(g.conn)
+    city = []
+    for result in cursor:
+        city.append(result)
+    cursor.close()
+    
+    #find all cuisine types
+    cursor = query.all_cuisine(g.conn)
+    cuisine = []
+    for result in cursor:
+        cuisine.append(result)
+    cursor.close()
+    
+    
+    context = dict(city=city, cuisine=cuisine)
+    return render_template('search.html', **context)
+    
+@app.route('/search-res', methods =['POST'])
+def search_res():
+    rname = request.form["name"]
+    city = request.form["city"]
+    cuisine = request.form["cuisine_type"]
+    cost = request.form["cost"]
+    cursor = query.search_res(g.conn,rname,city,cuisine,cost)
+    res = []
+    for result in cursor:
+        res.append(result)
+    cursor.close()
+    
+    context = dict(res=res)
+    return render_template("restaurants.html", **context)
 
 
 # Example of adding new data to the database
+'''
 @app.route('/add', methods=['POST'])
 def add():
   name = request.form['name']
@@ -174,7 +210,7 @@ def add():
 def login():
     abort(401)
     this_is_never_executed()
-
+'''
 
 if __name__ == "__main__":
   import click
