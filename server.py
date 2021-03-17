@@ -17,7 +17,11 @@ import query
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
+app.secret_key = "26533228" 
 
+# apply the blueprints to the app
+import auth
+app.register_blueprint(auth.bp)
 
 #
 # The following is a dummy URI that does not connect to a valid database. You will need to modify it to connect to your Part 2 database in order to use the data.
@@ -213,6 +217,7 @@ def search_res():
     context = dict(res=res)
     return render_template("restaurants.html", **context)
     
+
 
 
 # Example of adding new data to the database
