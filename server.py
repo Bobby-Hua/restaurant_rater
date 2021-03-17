@@ -96,7 +96,21 @@ def teardown_request(exception):
 #
 @app.route('/')
 def index():
-    return dashboard()
+    cursor = query.all_city(g.conn)
+    city = []
+    for result in cursor:
+        city.append(result)
+    cursor.close()
+    
+    #find all cuisine types
+    cursor = query.all_cuisine(g.conn)
+    cuisine = []
+    for result in cursor:
+        cuisine.append(result)
+    cursor.close()
+    
+    context = dict(city=city, cuisine=cuisine)
+    return render_template('index.html', **context)
 """
 request is a special object that Flask provides to access web request information:
 
@@ -165,25 +179,6 @@ cursor.close()
 # Notice that the function name is another() rather than index()
 # The functions for each app.route need to have different names
 #
-def dashboard():
-    
-    #find all cities
-    cursor = query.all_city(g.conn)
-    city = []
-    for result in cursor:
-        city.append(result)
-    cursor.close()
-    
-    #find all cuisine types
-    cursor = query.all_cuisine(g.conn)
-    cuisine = []
-    for result in cursor:
-        cuisine.append(result)
-    cursor.close()
-    
-    
-    context = dict(city=city, cuisine=cuisine)
-    return render_template('search.html', **context)
     
 @app.route('/search-res', methods =['POST'])
 def search_res():
