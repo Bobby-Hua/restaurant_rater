@@ -9,6 +9,10 @@
     }
   </style>
   
+  <a href="/">
+    <button>Back to Dashboard</button>
+ </a>
+  
   <body>
   
    {% for r in res %}
@@ -18,6 +22,12 @@
     <li>Name: {{r.res_name}}</li>
 
     <li>Rating: {{r.star }}</li>
+    
+    <li>City: {{r.city_name }}</li>
+    
+    <li>Cuisine Type: {{r.cuisine_name }}</li>
+    
+    <li>Cost: {{r.cost_category }}</li>
 
     </ul>
 

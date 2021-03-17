@@ -13,31 +13,24 @@
     <p>Search for a restaurant:
     <form action="/search-res" method="POST">
       <input type="text" name="name" value="">
-      <input type="submit" value="Search">
       <h5>City</h5>
-          <select id="city">
+          <select name="city">
           <option></option>
           {% for c in city %}
-            <option value = c.city_name>{{c.city_name}}</option>
+            <option value= "{{c.city_name}}">{{c.city_name}}</option>
           {% endfor %}
         </select>
       <h5>Cuisine Type</h5>
-          <select id="cuisine_type">
-          <option></option>
           {% for c in cuisine %}
-            <option value = c.cuisine_name>{{c.cuisine_name}}</option>
+            <input type="checkbox" value={{c.cuisine_name}} name="check_type">{{c.cuisine_name}}<br>
           {% endfor %}
-        </select>
-     <h5>Cost Category</h5>
-          <select id="cost">
-            <option></option>
-            <option value = "$">$</option>
-            <option value = "$$">$$</option>
-            <option value = "$$$">$$$</option>
-            <option value = "$$$$">$$$$</option>
-            
-        </select>
-        
+      <h5>Cost Category</h5>
+          <input type="checkbox" value= "$" name="check_cost">$<br>
+          <input type="checkbox" value="$$" name="check_cost">$$<br>
+          <input type="checkbox" value="$$$" name="check_cost">$$$<br>
+          <input type="checkbox" value="$$$$" name="check_cost">$$$$<br>
+      <br>
+      <input type="submit" value="Search">  
         
     </form>
     
