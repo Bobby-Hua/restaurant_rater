@@ -44,7 +44,7 @@ def customer_login_required(view):
 
 
 @bp.before_app_request
-def load_logged_in_customer():
+def load_logged_in_user():
     """If a user id is stored in the session, load the user object from
     the database into ``g.user``."""
     g.user_id = session.get("user_id")
@@ -52,12 +52,13 @@ def load_logged_in_customer():
 
 
 @bp.route("/customerregister", methods=("GET", "POST"))
-def register_customer(conn):
+def register_customer():
     """Register a new user.
 
     Validates that the username is not already taken. Hashes the
     password for security.
     """
+    conn=g.conn
     if request.method == "POST":
         name = request.form["username"]
         password = request.form["password"]
@@ -65,7 +66,7 @@ def register_customer(conn):
         
         customer_id=shortuuid.uuid() #generates a universally unique id; 22 chars
         
-        args=customer_id,name,phone_num,password
+        args=customer_id,name,phone_num,generate_password_hash(password)
         error = None
 
         if not name:
@@ -90,10 +91,37 @@ def register_customer(conn):
                 args
             )
             
-            return redirect(url_for("auth.login"))
+            return redirect(url_for("auth.customer_login"))
+        print('-'*30)
+        print(error)
 
         flash(error)
 
     return render_template("auth/customerregister.html")
 
 
+@bp.route("/customerlogin", methods=("GET", "POST"))
+def customer_login():
+    if request.method=="POST":
+        phone_num = request.form["phone_num"]
+        password = request.form["password"]
+  
+        
+    
+        conn=g.conn
+        error = None
+        user =conn.execute("SELECT * FROM customer WHERE phone_num=%s",
+                           (phone_num,)).fetchone()
+        if user is None:
+            error="Incorrect phone number."
+        elif not check_password_hash(user['password'], password):
+            error='Incorrect password.'
+        
+        if error is None:
+            session.clear()
+            session['user_id']=user['customer_id']
+            return redirect(url_for("index"))
+        flash(error)
+    return render_template('auth/customerlogin.html')
+    
+    
