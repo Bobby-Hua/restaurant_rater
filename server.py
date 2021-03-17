@@ -184,9 +184,26 @@ def dashboard():
 @app.route('/search-res', methods =['POST'])
 def search_res():
     rname = request.form["name"]
-    city = request.form["city"]
-    cuisine = request.form["cuisine_type"]
-    cost = request.form["cost"]
+    city = request.form.getlist("city")
+    cuisine = request.form.getlist("check_type")
+    cost = request.form.getlist("check_cost")
+    
+    if len(city)==0:
+        cursor = query.all_city(g.conn)
+        for result in cursor:
+            city.append(result.city_name)
+        cursor.close()    
+    
+    if len(cuisine)==0:
+        cursor = query.all_cuisine(g.conn)
+        for result in cursor:
+            cuisine.append(result.cuisine_name)
+        cursor.close()
+        
+    if len(cost)==0:
+        cost=['$','$$','$$$','$$$$']
+    
+        
     cursor = query.search_res(g.conn,rname,city,cuisine,cost)
     res = []
     for result in cursor:
@@ -195,6 +212,7 @@ def search_res():
     
     context = dict(res=res)
     return render_template("restaurants.html", **context)
+    
 
 
 # Example of adding new data to the database
