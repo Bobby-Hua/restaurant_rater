@@ -12,8 +12,11 @@ import os
   # accessible as a variable in index.html:
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response
+from flask import Flask, request, render_template, g, redirect, Response,session, url_for
 import query
+from werkzeug.security import check_password_hash
+from werkzeug.security import generate_password_hash
+
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -109,8 +112,26 @@ def index():
         cuisine.append(result)
     cursor.close()
     
-    context = dict(city=city, cuisine=cuisine)
-    return render_template('index.html', **context)
+    #find liked food
+    if g.user_id:
+        uid = session['user_id']
+        fav_food_id = []
+        cursor = query.fav_food(g.conn,uid)
+        for result in cursor:
+            fav_food_id.append(result.cuisine_id)
+        cursor.close()
+        #find recommended restaurants
+        rec= []
+        for f in fav_food_id:
+            cursor = query.recommendation(g.conn,f)
+            for result in cursor:
+                rec.append(result)
+            cursor.close()
+        context = dict(city=city, cuisine=cuisine,rec=rec)
+        return render_template('index.html', **context)
+    else:
+        context = dict(city=city, cuisine=cuisine)
+        return render_template('index.html', **context)
 """
 request is a special object that Flask provides to access web request information:
 
@@ -186,10 +207,11 @@ def search_res():
     city = request.form.getlist("city")
     cuisine = request.form.getlist("check_type")
     cost = request.form.getlist("check_cost")
-    
-    if len(city)==0:
+    print(len(city))
+    if city==['']:
         cursor = query.all_city(g.conn)
         for result in cursor:
+            print("result", result)
             city.append(result.city_name)
         cursor.close()    
     
@@ -202,7 +224,9 @@ def search_res():
     if len(cost)==0:
         cost=['$','$$','$$$','$$$$']
     
-        
+    print(city)
+    print(cuisine)
+    print(cost)
     cursor = query.search_res(g.conn,rname,city,cuisine,cost)
     res = []
     for result in cursor:
@@ -212,7 +236,65 @@ def search_res():
     context = dict(res=res)
     return render_template("restaurants.html", **context)
     
+@app.route('/myprofile', methods = ['GET'])
+def my_profile():
+    conn = g.conn
+    uid = session['user_id']
+    my_info = conn.execute("SELECT * FROM customer WHERE customer_id = %s;", uid).fetchone()
+    my_name = my_info['name']
+    my_phone = my_info['phone_num']
+    my_pwd = my_info['password']
+    
+    #find liked food types
+    cursor = query.fav_food(conn, uid)
+    fav_food = []
+    for result in cursor:
+        fav_food.append(result)
+    cursor.close()
+    print(fav_food)
+    
+    cuisine = []
+    cursor = query.all_cuisine(g.conn)
+    for result in cursor:
+        cuisine.append(result)
+    cursor.close()
 
+    #find friends
+    cursor = conn.execute("SELECT customer_id_2 FROM is_friend WHERE customer_id_1 = %s", uid)
+    friend=[]
+    for result in cursor:
+        friend.append(result)
+    cursor.close()  
+    
+    
+    context = dict(my_name = my_name, my_phone = my_phone, cuisine = cuisine,
+                   my_pwd = my_pwd, fav_food = fav_food, friend = friend)
+    return render_template("myprofile.html", **context)
+
+@app.route('/myprofile', methods = ['POST'])
+def my_profile_edit():
+    conn = g.conn
+    uid = session['user_id']
+    name = request.form["username"]
+    phone = request.form["phone_number"]
+    pwd = generate_password_hash(request.form["password"])
+    fav_food = request.form.getlist("fav_food")
+        
+    if request.form.get("update_name"):
+        conn.execute("UPDATE customer SET name = %s WHERE customer_id = %s;", name, uid)
+            
+    elif request.form.get("update_phone"):
+        conn.execute("UPDATE customer SET phone_num = %s WHERE customer_id = %s;", phone, uid)
+        
+    elif request.form.get("update_pwd"):
+        conn.execute("UPDATE customer SET phone_num = %s WHERE customer_id = %s;", pwd, uid)
+        
+    else:
+        conn.execute("DELETE FROM likes_cuisine WHERE customer_id = %s;", uid)
+        for f in fav_food:
+            conn.execute("INSERT INTO likes_cuisine VALUES (%s, %s);", uid, f)
+                
+    return redirect(url_for("my_profile"))
 
 
 # Example of adding new data to the database
