@@ -5,7 +5,7 @@
   <h1><a href="{{ url_for('index') }}">Home</a></h1>
   <ul>
     {% if g.user_id %}
-      <li><span>{{ g.user['username'] }}</span>
+      <li><span>{{ g.user_name }}</span>
       <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
     {% else %}
     
@@ -15,7 +15,6 @@
     {% endif %}
   </ul>
 </nav>
-  
 <section class="content">
   <header>
     {% block header %}{% endblock %}
