@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}{{res['res_name']}}{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}  
+<table>
+    <tr>
+        <td>Restaurant Name</td>
+        <td>res['res_name']</td>
+    </tr>
+    <tr>
+        <td>Address</td>
+        <td>res['street_addr']</td>
+    </tr>
+    <tr>
+        <td>Cost</td>
+        <td>res['cost_category']</td>
+    </tr>
+    <tr>
+        <td>City</td>
+        <td>res['city_state']</td> 
+    </tr>
+    <tr>
+        <td>Description</td>
+        <td>res['description']</td> 
+    </tr> 
+    <tr>
+        <td>Average stars</td>
+        <td>res['avg_star']</td> 
+    </tr> 
+</table>
+<table>
+    {% for r in reviews %}
+        <tr>
+            <td>
+                r['text']
+            </td>
+            <td>
+                r['likes']
+            </td>
+            <td>
+                <form action={{url_for("like_review",review_id=r['rating_id'])}}>
+                    <input type="submit" value="Go to Google" />
+                </form>
+            </td>    
+        </tr>
+
+
+    {%endfor%}
+</table>
+
+{% endblock %}  
