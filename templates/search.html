@@ -1,40 +1,38 @@
-<html>
-  <style>
-    body{
-      font-size: 15pt;
-      font-family: arial;
-    }
-    ul {
-    list-style-type: none;
-    }
-  </style>
-  
-  <body>   
-    <p>Search for a restaurant:
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Search for Restaurants: {% endblock %}</h1>
+{% endblock %}
+
+{% block content %}  
     <form action="/search-res" method="POST">
-      <input type="text" name="name" value="">
-      <h5>City</h5>
+    <table>
+      <tr>
+        <td style="vertical-align:top"><div><h5>Name</h5><input type="text" name="name" value=""></div>
+        <td style="vertical-align:top"><div><h5>City</h5>
           <select name="city">
           <option></option>
           {% for c in city %}
             <option value= "{{c.city_name}}">{{c.city_name}}</option>
           {% endfor %}
-        </select>
-      <h5>Cuisine Type</h5>
+        </select></div>
+        <td style="vertical-align:top"><div><h5>Cuisine Type</h5>
           {% for c in cuisine %}
             <input type="checkbox" value={{c.cuisine_name}} name="check_type">{{c.cuisine_name}}<br>
           {% endfor %}
-      <h5>Cost Category</h5>
+          </div>
+        <td style="vertical-align:top"><div><h5>Cost Category</h5>
           <input type="checkbox" value= "$" name="check_cost">$<br>
           <input type="checkbox" value="$$" name="check_cost">$$<br>
           <input type="checkbox" value="$$$" name="check_cost">$$$<br>
           <input type="checkbox" value="$$$$" name="check_cost">$$$$<br>
-      <br>
-      <input type="submit" value="Search">  
-        
-    </form>
-    
-  </p>
-</body>
+      </div>
+     </tr>
+   </table> 
+   <br>
+   <br>
+   <input type="submit" value="Search"> 
+   </form>  
+{% endblock %}
 
 </html>
