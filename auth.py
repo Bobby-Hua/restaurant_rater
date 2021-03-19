@@ -47,8 +47,11 @@ def customer_login_required(view):
 def load_logged_in_user():
     """If a user id is stored in the session, load the user object from
     the database into ``g.user``."""
-    g.user_id = session.get("user_id")
+    g.user_id=session.get("user_id")
+    g.user_name=session.get("user_name")
     g.user_type=session.get("user_type")
+    
+            
 
 
 @bp.route("/customerregister", methods=("GET", "POST"))
@@ -120,8 +123,14 @@ def customer_login():
         if error is None:
             session.clear()
             session['user_id']=user['customer_id']
+            session['user_name']=user['name']           
+            session['user_type']='customer'
             return redirect(url_for("index"))
         flash(error)
     return render_template('auth/customerlogin.html')
     
-    
+@bp.route("/logout")
+def logout():
+    """Clear the current session, including the stored user id."""
+    session.clear()
+    return redirect(url_for("index"))
