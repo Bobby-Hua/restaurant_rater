@@ -211,7 +211,6 @@ def search_res():
     if city==['']:
         cursor = query.all_city(g.conn)
         for result in cursor:
-            print("result", result)
             city.append(result.city_name)
         cursor.close()    
     
@@ -259,14 +258,47 @@ def my_profile():
     
     #find friends
     cursor = conn.execute("SELECT customer_id_2 FROM is_friend WHERE customer_id_1 = %s", uid)
-    friend=[]
+    friend_id=[]
     for result in cursor:
-        friend.append(result)
-    cursor.close()  
+        friend_id.append(result.customer_id_2)
+    cursor.close()
+    cursor = conn.execute("SELECT customer_id_1 FROM is_friend WHERE customer_id_2 = %s", uid)
+    for result in cursor:
+        friend_id.append(result.customer_id_1)
+    cursor.close()
+    
+    friend=[]
+    for i in friend_id: 
+        info = conn.execute("SELECT * FROM customer WHERE customer_id = %s", i).fetchone()
+        friend.append(info)
     
     
+    #friend request
+    request = []    
+    cursor = conn.execute("SELECT customer_id_1 FROM friend_request WHERE customer_id_2 = %s "\
+                          "AND request_status = 'pending'" , uid)
+    for result in cursor:
+        request.append(result.customer_id_1)
+    cursor.close()
+    request_info =[]
+    for r in request:
+        info = conn.execute("SELECT * FROM customer WHERE customer_id = %s", r).fetchone()
+        request_info.append(info)
+        
+    #favorites 
+    fav_res = []
+    cursor = conn.execute("SELECT res_id FROM favorite_res WHERE customer_id = %s", uid)
+    for result in cursor:
+        res_info = conn.execute("SELECT * FROM restaurant WHERE res_id = %s", result.res_id).fetchone()
+        fav_res.append(res_info)
+    cursor.close()
+    
+    print(fav_res)
+    
+
     context = dict(my_name = my_name, my_phone = my_phone, cuisine = cuisine,
-                   my_pwd = my_pwd, fav_food = fav_food, friend = friend)
+                   my_pwd = my_pwd, fav_food = fav_food, friend = friend, request_info=request_info,
+                   fav_res=fav_res)
     return render_template("myprofile.html", **context)
 
 @app.route('/myprofile', methods = ['POST'])
@@ -277,23 +309,61 @@ def my_profile_edit():
     phone = request.form["phone_number"]
     pwd = generate_password_hash(request.form["password"])
     fav_food = request.form.getlist("fav_food")
+    friend_phone = request.form["friend_phone"]
         
     if request.form.get("update_name"):
         conn.execute("UPDATE customer SET name = %s WHERE customer_id = %s;", name, uid)
+        return redirect(url_for("my_profile"))
             
     elif request.form.get("update_phone"):
         conn.execute("UPDATE customer SET phone_num = %s WHERE customer_id = %s;", phone, uid)
+        return redirect(url_for("my_profile"))
         
     elif request.form.get("update_pwd"):
         conn.execute("UPDATE customer SET phone_num = %s WHERE customer_id = %s;", pwd, uid)
+        return redirect(url_for("my_profile"))
         
-    else:
+    elif request.form.get("update_food"):
         conn.execute("DELETE FROM likes_cuisine WHERE customer_id = %s;", uid)
         for f in fav_food:
             conn.execute("INSERT INTO likes_cuisine VALUES (%s, %s);", uid, f)
+        return redirect(url_for("my_profile"))
+            
+    elif request.form.get("accept_request"):
+        req_id = request.form["accept_request"]
+        conn.execute("UPDATE friend_request SET request_status = 'accepted' WHERE customer_id_1 = %s AND "\
+                     "customer_id_2 = %s;", req_id, uid)
+        conn.execute("INSERT INTO is_friend VALUES (%s, %s);", uid, req_id)
+        return redirect(url_for("my_profile"))
+        
+    elif request.form.get("reject_request"):
+        req_id = request.form["reject_request"]
+        conn.execute("UPDATE friend_request SET request_status = 'rejected' WHERE customer_id_1 = %s AND "\
+                     "customer_id_2 = %s;", req_id, uid)
+        return redirect(url_for("my_profile"))
+        
+    else:
+        friend = conn.execute("SELECT * FROM customer WHERE phone_num = %s", friend_phone).fetchone()
+        if friend is None:
+            return render_template_string('<html><head></head><body>The person you are looking '\
+                                          'for is not registered. <a href="/myprofile">'\
+                                     '<button>Go Back</button></a></body><html>')
+        else:
+            friend_id = friend.customer_id
+            if ((conn.execute("SELECT customer_id_1 FROM friend_request WHERE customer_id_1 = %s AND " \
+                "customer_id_2 = %s", uid, friend_id).fetchone() is None) and (conn.execute("SELECT customer_id_1 FROM friend_request WHERE customer_id_1 = %s AND " \
+                "customer_id_2 = %s", friend_id, uid).fetchone() is None)):      
+                conn.execute("INSERT INTO friend_request VALUES (%s, %s,'pending');", uid, friend_id)
+                return render_template_string('<html><head></head><body>Request successfully sent! '\
+                                              '<a href="/myprofile">'\
+                                              '<button>Go Back</button></a></body><html>')
                 
-    return redirect(url_for("my_profile"))
-
+            else:        
+                return render_template_string('<html><head></head><body>There is already a request! '\
+                                              '<a href="/myprofile">'\
+                                              '<button>Go Back</button></a></body><html>')
+                
+        
 # =============================================================================
 # Restaurant Specific Functions
 # =============================================================================
@@ -318,6 +388,25 @@ def restaurant(res_id):
     context=dict(res=res,city_state=city_state,reviews=all_reviews) 
 
     return render_template('restaurant.html', **context)
+
+@app.route('/restaurant/<res_id>', methods =['POST'])
+def restaurant_fav(res_id):
+    conn=g.conn
+    uid = session['user_id']
+    print(uid)
+    fav_id = request.form["add_fav"]
+    print(fav_id)
+    if (conn.execute("SELECT * FROM favorite_res WHERE res_id = %s AND customer_id = %s", 
+        fav_id, uid).fetchone() is None):
+        
+        conn.execute("INSERT INTO favorite_res VALUES (%s, %s)", fav_id, uid)
+        return render_template_string('<html><head></head><body>Restaurant successfully added! '\
+                                              '<a href="/myprofile">'\
+                                              '<button>View in Favorites</button></a></body><html>')
+    else:
+        return render_template_string('<html><head></head><body>This restaurant is already your favorite! '\
+                                              '<a href="/myprofile">'\
+                                              '<button>View in Favorites</button></a></body><html>')
 
 
 

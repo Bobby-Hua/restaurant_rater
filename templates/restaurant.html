@@ -32,7 +32,11 @@
     </tr> 
     <tr>
         <form action={{url_for("reserve",res_id=res['res_id'])}}>
-        <input type="submit" value="reserve" />
+        <input type="submit" value="Reserve" /></form>
+        {%if g.user_id %}
+        <form method="post">
+        <button type="submit" name="add_fav" value={{res['res_id']}}>Add to Favorites</button></form>
+        {% endif %}
     </tr>
 </table>
 <table border=1>
