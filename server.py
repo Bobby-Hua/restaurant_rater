@@ -208,7 +208,6 @@ def search_res():
     city = request.form.getlist("city")
     cuisine = request.form.getlist("check_type")
     cost = request.form.getlist("check_cost")
-    print(len(city))
     if city==['']:
         cursor = query.all_city(g.conn)
         for result in cursor:
@@ -225,9 +224,6 @@ def search_res():
     if len(cost)==0:
         cost=['$','$$','$$$','$$$$']
     
-    print(city)
-    print(cuisine)
-    print(cost)
     cursor = query.search_res(g.conn,rname,city,cuisine,cost)
     res = []
     for result in cursor:
@@ -236,7 +232,7 @@ def search_res():
     
     context = dict(res=res)
     return render_template("restaurants.html", **context)
-    
+
 
 @app.route('/myprofile', methods = ['GET'])
 def my_profile():
@@ -253,18 +249,13 @@ def my_profile():
     for result in cursor:
         fav_food.append(result)
     cursor.close()
-    print(fav_food)
     
     cuisine = []
     cursor = query.all_cuisine(g.conn)
     for result in cursor:
         cuisine.append(result)
     cursor.close()
-
-
-        
     
-
     #find friends
     cursor = conn.execute("SELECT customer_id_2 FROM is_friend WHERE customer_id_1 = %s", uid)
     friend=[]
@@ -358,7 +349,7 @@ def reserve(res_id):
     
     return render_template('reservation.html', **context)
     
-    
+
 
 # Example of adding new data to the database
 '''
