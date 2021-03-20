@@ -23,25 +23,42 @@
         <li>{{ f.cuisine_name }}</li>
       {% endfor %}
     {% endif %}
-    <br>
-    <br>
     {% for c in cuisine %}
         <input type="checkbox" value={{c.cuisine_id}} name="fav_food">{{c.cuisine_name}}<br>
     {% endfor %}
     <br>
     <button type="submit" name="update_food" value="update_food">update</button>
-  
-  <h3>My friends:</h3>
-    <label for="friend_phone">Search for a new friend by phone: </label>
+    <br>
+    
+    <h3>My friends:</h3>
+    <label for="friend_phone">Add a new friend by phone: </label>
     <input name="friend_phone" id="friend_phone">
-    <button type="submit" name="search_friend" value="search_friend">Search Friend</button>
-    {%if friend ==[]%}
+    <button type="submit" name="search_friend" value= "Search Friend"/>Add Friend</button>
+    {% if friend ==[] %}
         <p>The list is empty. Make some new friends! </p>
     {% else %}
       {% for f in friend %}
-        <p>{{ f.customer_id_2 }}</p>
+      <ul>
+        <li>Name: {{ f.name }}</li> 
+        <li>Phone: {{ f.phone_num }}</li>
+      </ul>
       {% endfor %}
     {% endif %}
-  
+    
+    <h3>Friend Requests:</h3>
+    {%if request_info == []%}
+        <p>All friend requests have been handled. </p>
+    {% else %}
+      {% for r in request_info %}
+        <p>Name: {{r.name}}</p>
+        <p>Phone: {{r.phone_num}}</p>
+        <p>Status: pending</p>
+        <table><tr>
+        <button type="submit" name="accept_request" value={{r.customer_id}}>Accept</button>
+        <button type="submit" name="reject_request" value={{r.customer_id}}>Reject</button>
+        </tr></table>
+      {% endfor %}
+    {% endif %}
+    
  </form> 
 {% endblock %}
