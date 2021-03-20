@@ -283,10 +283,21 @@ def my_profile():
     for r in request:
         info = conn.execute("SELECT * FROM customer WHERE customer_id = %s", r).fetchone()
         request_info.append(info)
-    print(request_info)
+        
+    #favorites 
+    fav_res = []
+    cursor = conn.execute("SELECT res_id FROM favorite_res WHERE customer_id = %s", uid)
+    for result in cursor:
+        res_info = conn.execute("SELECT * FROM restaurant WHERE res_id = %s", result.res_id).fetchone()
+        fav_res.append(res_info)
+    cursor.close()
+    
+    print(fav_res)
+    
 
     context = dict(my_name = my_name, my_phone = my_phone, cuisine = cuisine,
-                   my_pwd = my_pwd, fav_food = fav_food, friend = friend, request_info=request_info)
+                   my_pwd = my_pwd, fav_food = fav_food, friend = friend, request_info=request_info,
+                   fav_res=fav_res)
     return render_template("myprofile.html", **context)
 
 @app.route('/myprofile', methods = ['POST'])
@@ -376,6 +387,25 @@ def restaurant(res_id):
     context=dict(res=res,city_state=city_state,reviews=all_reviews) 
 
     return render_template('restaurant.html', **context)
+
+@app.route('/restaurant/<res_id>', methods =['POST'])
+def restaurant_fav(res_id):
+    conn=g.conn
+    uid = session['user_id']
+    print(uid)
+    fav_id = request.form["add_fav"]
+    print(fav_id)
+    if (conn.execute("SELECT * FROM favorite_res WHERE res_id = %s AND customer_id = %s", 
+        fav_id, uid).fetchone() is None):
+        
+        conn.execute("INSERT INTO favorite_res VALUES (%s, %s)", fav_id, uid)
+        return render_template_string('<html><head></head><body>Restaurant successfully added! '\
+                                              '<a href="/myprofile">'\
+                                              '<button>View in Favorites</button></a></body><html>')
+    else:
+        return render_template_string('<html><head></head><body>This restaurant is already your favorite! '\
+                                              '<a href="/myprofile">'\
+                                              '<button>View in Favorites</button></a></body><html>')
 
 
 
