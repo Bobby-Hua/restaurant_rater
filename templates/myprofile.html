@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}My Profile {% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <p>Name: {{ my_name }}</p>
+    <input name="username" id="username">
+    <button type="submit" name="update_name" value="update_name">update</button>
+    <p>Phone Number: {{ my_phone }}</p>
+    <input name="phone_number" id="phone_number">
+    <button type="submit" name="update_phone" value="update_phone">update</button>
+    <p>Password: </p>
+    <input name="password" id="password">
+    <button type="submit" name="update_pwd" value="update_pwd">update</button>
+    <h3>My favorite cuisine types: </h3>
+    {%if fav_food ==[]%}
+        <p>The list is empty. Select some of your favorite food types!</p>
+    {% else %}
+      {% for f in fav_food %}
+        <li>{{ f.cuisine_name }}</li>
+      {% endfor %}
+    {% endif %}
+    <br>
+    <br>
+    {% for c in cuisine %}
+        <input type="checkbox" value={{c.cuisine_id}} name="fav_food">{{c.cuisine_name}}<br>
+    {% endfor %}
+    <br>
+    <button type="submit" name="update_food" value="update_food">update</button>
+  </form>
+  
+  <h3>My friends:</h3>
+    {%if friend ==[]%}
+        <p>The list is empty. Make some new friends! </p>
+    {% else %}
+      {% for f in friend %}
+        <p>{{ f.customer_id_2 }}</p>
+      {% endfor %}
+    {% endif %}
+  
+  
+{% endblock %}
