@@ -326,7 +326,6 @@ def my_profile_edit():
         
     elif request.form.get("reject_request"):
         req_id = request.form["reject_request"]
-        ids = (uid,req_id)
         conn.execute("UPDATE friend_request SET request_status = 'rejected' WHERE customer_id_1 = %s AND "\
                      "customer_id_2 = %s;", req_id, uid)
         return redirect(url_for("my_profile"))
