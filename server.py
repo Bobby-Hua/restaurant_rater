@@ -231,6 +231,7 @@ def search_res():
     cursor.close()
     
     context = dict(res=res)
+    print('rendering all the restaurants')
     return render_template("restaurants.html", **context)
 
 

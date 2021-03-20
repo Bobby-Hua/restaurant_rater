@@ -8,6 +8,7 @@
       <li><span>{{ g.user_name }}</span>
       <li><a href="{{ url_for('my_profile') }}">My Profile</a>
       <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
+      <li><a href="{{ url_for('index') }}">Search Restaurants</a>
     {% else %}
     
       <li><a href="{{ url_for('auth.register_customer') }}">Customer Register</a> 
