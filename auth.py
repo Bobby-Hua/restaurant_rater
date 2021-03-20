@@ -29,12 +29,12 @@ bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 #requires customer login
 def customer_login_required(view):
-    """View decorator that redirects anonymous users to the login page."""
+    """View decorator that redirects anonymous customer to the login page."""
 
     @functools.wraps(view)
     def wrapped_view(**kwargs):
-        if g.user is None or g.user_type!='customer':
-            return redirect(url_for("auth.login"))
+        if g.user_id is None or g.user_type!='customer':
+            return redirect(url_for("auth.customer_login"))
 
         return view(**kwargs)
 

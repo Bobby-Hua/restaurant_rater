@@ -12,7 +12,7 @@ import os
   # accessible as a variable in index.html:
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response
+from flask import Flask, request, render_template, render_template_string, g, redirect, Response, url_for
 import query
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
@@ -21,6 +21,7 @@ app.secret_key = "26533228"
 
 # apply the blueprints to the app
 import auth
+from auth import customer_login_required
 app.register_blueprint(auth.bp)
 
 #
@@ -212,20 +213,50 @@ def search_res():
     context = dict(res=res)
     return render_template("restaurants.html", **context)
     
-# @app.route('/restaurant/<res_id>', methods =['GET'])
-# def restaurant(res_id):
-#     conn=g.conn
-#     #array-like res
-#     res=conn.execute('select * from restaurant where res_id=%s;',(res_id,))
-#     reviews=conn.execute('SELECT rati.rating_id rating_id, text, likes FROM restaurant res, rating rati, review rev where res.res_id=%s AND res.res_id=rati.res_id AND rati.rating_id=rev.rating_id;',(res_id,))
-#     ## TODO:
-#         #'ORDER BY likes;'
+@app.route('/restaurant/<res_id>', methods =['GET'])
+def restaurant(res_id):
+    conn=g.conn
+    #array-like res
+    res=conn.execute('select * from restaurant where res_id=%s;',(res_id,)).fetchone()
+    reviews=conn.execute('SELECT rati.rating_id rating_id, text, likes, rati.stars_value stars_value '\
+                         'FROM restaurant res, rating rati, review rev '\
+                        'where res.res_id=%s AND res.res_id=rati.res_id '\
+                        ' AND rati.rating_id=rev.rating_id order by likes desc;',(res_id,))
+    all_reviews=[]
+    for r in reviews:
+        r_dict=dict(r)
+        all_reviews.append(r_dict)
+
+    city_state=conn.execute('SELECT * from city where city_id=%s',(res['city_id'],)).fetchone()
+    print(city_state)
+    city_state=city_state['city_name']+' '+ city_state['state_abbrev']
+    context=dict(res=res,city_state=city_state,reviews=all_reviews) 
+
+    return render_template('restaurant.html', **context)
+
+
+@app.route('/likereview/<res_id>/<rating_id>', methods =['GET'])
+@customer_login_required
+def likereview(res_id,rating_id):
+    conn=g.conn
+    customer_id=g.user_id
+    if (conn.execute('SELECT * from likes_review WHERE rating_id=%s AND customer_id=%s',
+                     (rating_id,customer_id)).fetchone() is None) :
+        conn.execute('INSERT INTO likes_review VALUES (%s,%s)',(rating_id,customer_id))
+        conn.execute("UPDATE review SET likes=likes+1 WHERE rating_id=%s",(rating_id,))
+        return redirect(url_for('restaurant',res_id=res_id))
+    else:
+        return render_template_string('<html><head></head><body>You liked it already</body><html>')
+
+@app.route('/reserve/<res_id>', methods =['GET','POST'])
+@customer_login_required
+def reserve(res_id):
+    conn=g.conn
+    customer_id=g.user_id
+    
         
-#     city_state=conn.execute('SELECT * from city where'\
-#                       'city_id=%s',(res['city_id'],))
-#     city_state=city_state['city_name']+' '+ city_state['state_abbrev']
-#     context=dict(res=res,city_state=city_state,reviews=reviews) 
-#     return render_template('restaurant.html', **context)
+    
+
 
 
 # Example of adding new data to the database

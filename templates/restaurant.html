@@ -7,42 +7,58 @@
 {% block content %}  
 <table>
     <tr>
-        <td>Restaurant Name</td>
-        <td>res['res_name']</td>
+        <td>Restaurant Name: </td>
+        <td>{{res['res_name']}}</td>
     </tr>
     <tr>
-        <td>Address</td>
-        <td>res['street_addr']</td>
+        <td>Address: </td>
+        <td>{{res['street_addr']}}</td>
     </tr>
     <tr>
-        <td>Cost</td>
-        <td>res['cost_category']</td>
+        <td>Cost: </td>
+        <td>{{res['cost_category']}}</td>
     </tr>
     <tr>
-        <td>City</td>
-        <td>res['city_state']</td> 
+        <td>City: </td>
+        <td>{{city_state}}</td> 
     </tr>
     <tr>
-        <td>Description</td>
-        <td>res['description']</td> 
+        <td>Description: </td>
+        <td>{{res['description']}}</td> 
     </tr> 
     <tr>
-        <td>Average stars</td>
-        <td>res['avg_star']</td> 
+        <td>Average stars: </td>
+        <td>{{res['avg_star']}}</td> 
     </tr> 
 </table>
-<table>
+<table border=1>
+<tr>
+    <td>
+        Review Text
+    </td>
+    <td>
+        stars
+    </td>
+    <td>
+        likes
+    </td>
+</tr>
+
     {% for r in reviews %}
         <tr>
             <td>
-                r['text']
+                {{r['text']}}
             </td>
             <td>
-                r['likes']
+                {{r['stars_value']}}
             </td>
             <td>
-                <form action={{url_for("like_review",review_id=r['rating_id'])}}>
-                    <input type="submit" value="Go to Google" />
+                {{r['likes']}}
+            </td>
+            <td>
+
+                <form action={{url_for("likereview",res_id=res['res_id'],rating_id=r['rating_id'])}}>
+                    <input type="submit" value="like" />
                 </form>
             </td>    
         </tr>
