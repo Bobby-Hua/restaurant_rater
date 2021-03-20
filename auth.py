@@ -128,7 +128,95 @@ def customer_login():
             return redirect(url_for("index"))
         flash(error)
     return render_template('auth/customerlogin.html')
+
+@bp.route("/resregister", methods=("GET", "POST"))
+def register_restaurant():
+    """Register a new restaurant
+
+    Validates that the username is not already taken. Hashes the
+    password for security.
+    """
+    conn=g.conn
+    if request.method == "POST":
+        name = request.form["username"]
+        addr=request.form["street_addr"]
+        cost=request.form['cost']
+        description=request.form['Description']
+        city_id=request.form['city_id']
+        password = request.form["password"]
+       
+        res_id=shortuuid.uuid() #generates a universally unique id; 22 chars
+        
+        args=res_id,name,addr,cost,city_id,description,generate_password_hash(password)
+        error = None
+
+
+        cost_ranges=['$','$$','$$$','$$$$']
+
+
+        if not name:
+            error = "Name is required."
+        elif not addr:
+            error='Address is required'
+       
+        elif (cost not in cost_ranges):
+            error = "Illegal cost category"
+        elif not city_id:
+            error="select your city"           
+        elif not password:
+            error = "Password is required."
+
+        if error is None:
+            # the name is available, store it in the database and go to
+            # the login page
+            conn.execute(
+                "INSERT INTO Restaurant "\
+                    "VALUES (%s, %s,%s,%s,%s,%s,%s)",
+                args
+            )
+            
+            return render_template("auth/resRegisterSuccess.html",res_id=res_id)
+       
+        print('-'*30)
+        print(error)
+
+        flash(error)
+
+
+    cities=conn.execute('SELECT * from city')
+    all_cities=[]
+    for c in cities:
+        c_dict=dict(c)
+        all_cities.append(c_dict)
+
+    context=dict(cities=all_cities)
+
+    return render_template("auth/resregister.html",**context)
+
+@bp.route("/reslogin", methods=("GET", "POST"))
+def res_login():
+    if request.method=="POST":
+        res_id = request.form["res_id"]
+        password = request.form["password"]
     
+        conn=g.conn
+        error = None
+        user =conn.execute("SELECT * FROM restaurant WHERE res_id=%s",
+                           (res_id,)).fetchone()
+        if user is None:
+            error="Incorrect ID."
+        elif not check_password_hash(user['password'], password):
+            error='Incorrect password.'
+        
+        if error is None:
+            session.clear()
+            session['user_id']=user['res_id']
+            session['user_name']=user['res_name']           
+            session['user_type']='restaurant'
+            return redirect(url_for("index"))
+        flash(error)
+    return render_template('auth/reslogin.html')
+
 @bp.route("/logout")
 def logout():
     """Clear the current session, including the stored user id."""

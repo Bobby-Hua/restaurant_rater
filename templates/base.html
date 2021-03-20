@@ -11,7 +11,9 @@
     {% else %}
     
       <li><a href="{{ url_for('auth.register_customer') }}">Customer Register</a> 
+      <li><a href="{{ url_for('auth.register_restaurant') }}">Restaurant Register</a> 
       <li><a href="{{ url_for('auth.customer_login') }}">Customer Log In</a>
+      <li><a href="{{ url_for('auth.res_login') }}">Restaurant Log In</a>
    
     {% endif %}
   </ul>
