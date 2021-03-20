@@ -339,8 +339,9 @@ def my_profile_edit():
                                      '<button>Go Back</button></a></body><html>')
         else:
             friend_id = friend.customer_id
-            if (conn.execute("SELECT customer_id_1 FROM friend_request WHERE customer_id_1 = %s AND " \
-                    "customer_id_2 = %s", uid, friend_id).fetchone() is None):      
+            if ((conn.execute("SELECT customer_id_1 FROM friend_request WHERE customer_id_1 = %s AND " \
+                "customer_id_2 = %s", uid, friend_id).fetchone() is None) and (conn.execute("SELECT customer_id_1 FROM friend_request WHERE customer_id_1 = %s AND " \
+                "customer_id_2 = %s", friend_id, uid).fetchone() is None)):      
                 conn.execute("INSERT INTO friend_request VALUES (%s, %s,'pending');", uid, friend_id)
                 return render_template_string('<html><head></head><body>Request successfully sent! '\
                                               '<a href="/myprofile">'\
@@ -351,22 +352,6 @@ def my_profile_edit():
                                               '<a href="/myprofile">'\
                                               '<button>Go Back</button></a></body><html>')
                 
-
-@app.route('/addfriend', methods = ['POST'])
-def add_friend():
-    conn = g.conn
-    uid = session['user_id']
-    friend_id = request.form['add_friend']
-    print(ids)
-    request_sent = conn.execute("SELECT * FROM friend_request WHERE customer_id_1 = %s AND" \
-                    "customer_id_2 = %s;", uid, ids).fetchone()
-    if request_sent is None:      
-        conn.execute("INSERT INTO friend_request VALUES (%s, %s,'pending');", uid, friend_id)
-        return redirect(url_for("my_profile"))
-    else:
-        return render_template_string('<html><head></head><body>There is already a request! '\
-                                          '<a href="/myprofile">'\
-                                          '<button>Go Back</button></a></body><html>')
         
 # =============================================================================
 # Restaurant Specific Functions
