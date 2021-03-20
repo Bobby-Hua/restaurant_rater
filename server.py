@@ -211,7 +211,6 @@ def search_res():
     if city==['']:
         cursor = query.all_city(g.conn)
         for result in cursor:
-            print("result", result)
             city.append(result.city_name)
         cursor.close()    
     
@@ -260,9 +259,12 @@ def my_profile():
     friend=[]
     for result in cursor:
         friend.append(result)
-    cursor.close()  
-    
-    
+    cursor.close()
+    cursor = conn.execute("SELECT customer_id_1 FROM is_friend WHERE customer_id_2 = %s", uid)
+    for result in cursor:
+        friend.append(result)
+    cursor.close()
+
     context = dict(my_name = my_name, my_phone = my_phone, cuisine = cuisine,
                    my_pwd = my_pwd, fav_food = fav_food, friend = friend)
     return render_template("myprofile.html", **context)
@@ -275,6 +277,7 @@ def my_profile_edit():
     phone = request.form["phone_number"]
     pwd = generate_password_hash(request.form["password"])
     fav_food = request.form.getlist("fav_food")
+    friend = request.form["friend_phone"]
         
     if request.form.get("update_name"):
         conn.execute("UPDATE customer SET name = %s WHERE customer_id = %s;", name, uid)
@@ -285,10 +288,12 @@ def my_profile_edit():
     elif request.form.get("update_pwd"):
         conn.execute("UPDATE customer SET phone_num = %s WHERE customer_id = %s;", pwd, uid)
         
-    else:
+    elif request.form.get("update_food"):
         conn.execute("DELETE FROM likes_cuisine WHERE customer_id = %s;", uid)
         for f in fav_food:
             conn.execute("INSERT INTO likes_cuisine VALUES (%s, %s);", uid, f)
+    else:
+        conn.execute("SELECT * FROM customer WHERE )
                 
     return redirect(url_for("my_profile"))
     

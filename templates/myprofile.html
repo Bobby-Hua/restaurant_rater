@@ -30,9 +30,11 @@
     {% endfor %}
     <br>
     <button type="submit" name="update_food" value="update_food">update</button>
-  </form>
   
   <h3>My friends:</h3>
+    <label for="friend_phone">Search for a new friend by phone: </label>
+    <input name="friend_phone" id="friend_phone">
+    <button type="submit" name="search_friend" value="search_friend">Search Friend</button>
     {%if friend ==[]%}
         <p>The list is empty. Make some new friends! </p>
     {% else %}
@@ -41,5 +43,5 @@
       {% endfor %}
     {% endif %}
   
-  
+ </form> 
 {% endblock %}
