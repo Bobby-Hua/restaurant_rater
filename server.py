@@ -208,7 +208,6 @@ def search_res():
     city = request.form.getlist("city")
     cuisine = request.form.getlist("check_type")
     cost = request.form.getlist("check_cost")
-    print(len(city))
     if city==['']:
         cursor = query.all_city(g.conn)
         for result in cursor:
@@ -225,9 +224,6 @@ def search_res():
     if len(cost)==0:
         cost=['$','$$','$$$','$$$$']
     
-    print(city)
-    print(cuisine)
-    print(cost)
     cursor = query.search_res(g.conn,rname,city,cuisine,cost)
     res = []
     for result in cursor:
@@ -252,7 +248,6 @@ def my_profile():
     for result in cursor:
         fav_food.append(result)
     cursor.close()
-    print(fav_food)
     
     cuisine = []
     cursor = query.all_cuisine(g.conn)
