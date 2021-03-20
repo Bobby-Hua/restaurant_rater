@@ -231,7 +231,8 @@ def search_res():
     
     context = dict(res=res)
     return render_template("restaurants.html", **context)
-    
+
+
 @app.route('/myprofile', methods = ['GET'])
 def my_profile():
     conn = g.conn
@@ -296,7 +297,11 @@ def my_profile_edit():
         conn.execute("SELECT * FROM customer WHERE )
                 
     return redirect(url_for("my_profile"))
-    
+
+# =============================================================================
+# Restaurant Specific Functions
+# =============================================================================
+
 @app.route('/restaurant/<res_id>', methods =['GET'])
 def restaurant(res_id):
     conn=g.conn
@@ -349,7 +354,6 @@ def reserve(res_id):
     
     return render_template('reservation.html', **context)
     
-
 
 
 # Example of adding new data to the database
