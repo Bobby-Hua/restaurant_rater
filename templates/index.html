@@ -32,9 +32,14 @@
    <br>
    <br>
    <input type="submit" value="Search"> 
-       {% if g.user_id %}
+   </form>  
+   {% if g.user_id %}
        <h3>Recommended for you:</h3>
-       
+       {% if rec == [] %}
+       <a href="/myprofile">
+            <button>Select your favorite food types first!</button>
+       </a>
+       {% else %}
         {% for r in rec %}
         <ul>
             <li>Name: {{r.res_name}}</li>
@@ -42,10 +47,13 @@
             <li>City: {{r.city_name }}</li> 
             <li>Cuisine Type: {{r.cuisine_name }}</li>
             <li>Cost: {{r.cost_category }}</li>
+            <a href="/restaurant/{{r.res_id}}">
+                <button>View Details</button>
+            </a>
         </ul>
         {% endfor %}
-        {% endif %}
-   </form>  
+       {% endif %}
+   {% endif %}
 {% endblock %}
 
 </html>
