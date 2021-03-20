@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Make Reservation{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="username">Name</label>
+    <input name="username" id="username" required>
+    <label for="phone number">phone number</label>
+    <input name="phone number" id="phone number" required>
+    <label for="guest_num">Number of Guests</label>
+    <input name="guest_num" id="guest_num" required>
+    <label for="datetime">Date Time in "mm/dd/yy"</label>
+    <input name="datetime" id="datetime" required>
+    <input type="submit" value="Reserve">
+  </form>
+{% endblock %}

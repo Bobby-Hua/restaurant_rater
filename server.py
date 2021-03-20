@@ -235,6 +235,7 @@ def restaurant(res_id):
     return render_template('restaurant.html', **context)
 
 
+
 @app.route('/likereview/<res_id>/<rating_id>', methods =['GET'])
 @customer_login_required
 def likereview(res_id,rating_id):
@@ -248,11 +249,22 @@ def likereview(res_id,rating_id):
     else:
         return render_template_string('<html><head></head><body>You liked it already</body><html>')
 
-@app.route('/reserve/<res_id>', methods =['GET','POST'])
+
+@app.route('/reservation/<res_id>', methods =['GET','POST'])
 @customer_login_required
-def reserve(res_id):
+def reserve(res_id):    
     conn=g.conn
     customer_id=g.user_id
+    context=dict(res_id=res_id)
+    if request.method=='POST':
+        name = request.form["username"]
+        phone_num=request.form["phone number"] 
+        guest_num=request.form["guest_num"]
+        datetime=request.form['datetime']
+        return render_template('revdone.html',**context)
+    
+    return render_template('reservation.html', **context)
+    
     
         
     

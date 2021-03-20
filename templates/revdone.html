@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Reservation Successful {% endblock %}</h1>
+{% endblock %}
+
+
+
+{% block content %}  
+<body>Reservation Made!</body>
+<form action={{url_for("restaurant",res_id=res_id)}}>
+<input type="submit" value="Back to Restaurant Page" />
+
+{% endblock %}  

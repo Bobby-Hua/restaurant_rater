@@ -30,6 +30,10 @@
         <td>Average stars: </td>
         <td>{{res['avg_star']}}</td> 
     </tr> 
+    <tr>
+        <form action={{url_for("reserve",res_id=res['res_id'])}}>
+        <input type="submit" value="reserve" />
+    </tr>
 </table>
 <table border=1>
 <tr>
