@@ -32,6 +32,19 @@
    <br>
    <br>
    <input type="submit" value="Search"> 
+       {% if g.user_id %}
+       <h3>Recommended for you:</h3>
+       
+        {% for r in rec %}
+        <ul>
+            <li>Name: {{r.res_name}}</li>
+            <li>Rating: {{r.star }}</li>  
+            <li>City: {{r.city_name }}</li> 
+            <li>Cuisine Type: {{r.cuisine_name }}</li>
+            <li>Cost: {{r.cost_category }}</li>
+        </ul>
+        {% endfor %}
+        {% endif %}
    </form>  
 {% endblock %}
 
