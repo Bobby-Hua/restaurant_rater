@@ -28,8 +28,7 @@
     {% endfor %}
     <br>
     <button type="submit" name="update_food" value="update_food">update</button>
-    <br>
-    
+    <br>    
     <h3>My friends:</h3>
     <label for="friend_phone">Add a new friend by phone: </label>
     <input name="friend_phone" id="friend_phone">
@@ -61,4 +60,18 @@
     {% endif %}
     
  </form> 
+ 
+     <h3>Favorites:</h3>
+    {% if fav_res ==[] %}
+        <p>The list is empty. Explore some restaurants! </p>
+    {% else %}
+      {% for r in fav_res %}
+      <p>
+      Name: {{r.res_name}}
+      <a href="/restaurant/{{r.res_id}}">
+      <button>View Details</button>
+      </a>
+      </p>
+      {% endfor %}
+    {% endif %}
 {% endblock %}
