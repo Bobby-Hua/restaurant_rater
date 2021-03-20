@@ -237,7 +237,6 @@ def search_res():
     context = dict(res=res)
     return render_template("restaurants.html", **context)
     
-<<<<<<< HEAD
 @app.route('/myprofile', methods = ['GET'])
 def my_profile():
     conn = g.conn
@@ -260,7 +259,44 @@ def my_profile():
     for result in cursor:
         cuisine.append(result)
     cursor.close()
-=======
+    
+    #find friends
+    cursor = conn.execute("SELECT customer_id_2 FROM is_friend WHERE customer_id_1 = %s", uid)
+    friend=[]
+    for result in cursor:
+        friend.append(result)
+    cursor.close()  
+    
+    
+    context = dict(my_name = my_name, my_phone = my_phone, cuisine = cuisine,
+                   my_pwd = my_pwd, fav_food = fav_food, friend = friend)
+    return render_template("myprofile.html", **context)
+
+@app.route('/myprofile', methods = ['POST'])
+def my_profile_edit():
+    conn = g.conn
+    uid = session['user_id']
+    name = request.form["username"]
+    phone = request.form["phone_number"]
+    pwd = generate_password_hash(request.form["password"])
+    fav_food = request.form.getlist("fav_food")
+        
+    if request.form.get("update_name"):
+        conn.execute("UPDATE customer SET name = %s WHERE customer_id = %s;", name, uid)
+            
+    elif request.form.get("update_phone"):
+        conn.execute("UPDATE customer SET phone_num = %s WHERE customer_id = %s;", phone, uid)
+        
+    elif request.form.get("update_pwd"):
+        conn.execute("UPDATE customer SET phone_num = %s WHERE customer_id = %s;", pwd, uid)
+        
+    else:
+        conn.execute("DELETE FROM likes_cuisine WHERE customer_id = %s;", uid)
+        for f in fav_food:
+            conn.execute("INSERT INTO likes_cuisine VALUES (%s, %s);", uid, f)
+                
+    return redirect(url_for("my_profile"))
+    
 @app.route('/restaurant/<res_id>', methods =['GET'])
 def restaurant(res_id):
     conn=g.conn
@@ -313,47 +349,7 @@ def reserve(res_id):
     
     return render_template('reservation.html', **context)
     
-    
-        
-    
->>>>>>> cda0cb51585b6cc8cb736cff2c07609d153cfb5a
 
-    #find friends
-    cursor = conn.execute("SELECT customer_id_2 FROM is_friend WHERE customer_id_1 = %s", uid)
-    friend=[]
-    for result in cursor:
-        friend.append(result)
-    cursor.close()  
-    
-    
-    context = dict(my_name = my_name, my_phone = my_phone, cuisine = cuisine,
-                   my_pwd = my_pwd, fav_food = fav_food, friend = friend)
-    return render_template("myprofile.html", **context)
-
-@app.route('/myprofile', methods = ['POST'])
-def my_profile_edit():
-    conn = g.conn
-    uid = session['user_id']
-    name = request.form["username"]
-    phone = request.form["phone_number"]
-    pwd = generate_password_hash(request.form["password"])
-    fav_food = request.form.getlist("fav_food")
-        
-    if request.form.get("update_name"):
-        conn.execute("UPDATE customer SET name = %s WHERE customer_id = %s;", name, uid)
-            
-    elif request.form.get("update_phone"):
-        conn.execute("UPDATE customer SET phone_num = %s WHERE customer_id = %s;", phone, uid)
-        
-    elif request.form.get("update_pwd"):
-        conn.execute("UPDATE customer SET phone_num = %s WHERE customer_id = %s;", pwd, uid)
-        
-    else:
-        conn.execute("DELETE FROM likes_cuisine WHERE customer_id = %s;", uid)
-        for f in fav_food:
-            conn.execute("INSERT INTO likes_cuisine VALUES (%s, %s);", uid, f)
-                
-    return redirect(url_for("my_profile"))
 
 
 # Example of adding new data to the database
