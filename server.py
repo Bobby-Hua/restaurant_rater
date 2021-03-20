@@ -16,7 +16,7 @@ from flask import Flask, request, render_template, render_template_string, g, re
 import query
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
-
+import shortuuid
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -341,10 +341,14 @@ def reserve(res_id):
     customer_id=g.user_id
     context=dict(res_id=res_id)
     if request.method=='POST':
-        name = request.form["username"]
-        phone_num=request.form["phone number"] 
+        reserv_id=shortuuid.uuid()
         guest_num=request.form["guest_num"]
         datetime=request.form['datetime']
+        customer_id=g.user_id
+        acceptance='pending'
+        conn.execute("INSERT INTO reservation VALUES (%s,%s,%s,%s,%s,%s)",
+                     reserv_id,guest_num,datetime,customer_id,res_id,acceptance)
+        
         return render_template('revdone.html',**context)
     
     return render_template('reservation.html', **context)
