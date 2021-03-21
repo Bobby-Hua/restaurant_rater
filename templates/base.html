@@ -6,7 +6,9 @@
   <ul>
     {% if g.user_id %}
       <li><span>{{ g.user_name }}</span>
-      <li><a href="{{ url_for('my_profile') }}">My Profile</a>
+        {% if g.user_type == 'customer' %}
+          <li><a href="{{ url_for('my_profile') }}">My Profile</a>
+        {% endif %}
       <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
       <li><a href="{{ url_for('index') }}">Search Restaurants</a>
     {% else %}

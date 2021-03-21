@@ -33,7 +33,7 @@
    <br>
    <input type="submit" value="Search"> 
    </form>  
-   {% if g.user_id %}
+   {% if g.user_id and g.user_type == 'customer' %}
        <h3>Recommended for you:</h3>
        {% if rec == [] %}
        <a href="/myprofile">
@@ -54,6 +54,13 @@
         {% endfor %}
        {% endif %}
    {% endif %}
-{% endblock %}
 
+    {% if g.user_id and g.user_type != 'customer' %}
+    <h3>Manage Reservation</h3>
+    <a href="/managerequests">
+        <button>View Requests</button>
+    </a>
+    {% endif %}
+    
+{% endblock %}
 </html>

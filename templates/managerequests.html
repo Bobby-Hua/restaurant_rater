@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Manage Reservation {% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <h3>Accepted Requests:</h3>
+    {% if req_accepted ==[] %}
+        <p>There is currently no accepted request.</p>
+    {% else %}
+      {% for r in req_accepted %}
+      <p>
+      Number of people: {{r.number_of_guests}}</p>
+      <p>Date and Time: {{r.datetime_scheduled}}
+      </p>
+      {% endfor %}
+    {% endif %}
+    <form method="post">
+    <h3>Pending Requests:</h3>
+    {% if req_pending ==[] %}
+        <p>All requests have been handled.</p>
+    {% else %}
+      {% for r in req_pending %}
+      <p>
+      Number of people: {{r.number_of_guests}}</p>
+      <p>Date and Time: {{r.datetime_scheduled}}
+      </p>
+      <table><tr>
+        <button type="submit" name="accept_request" value={{r.reserv_id}}>Accept</button>
+        <button type="submit" name="reject_request" value={{r.reserv_id}}>Reject</button>
+      </tr></table>
+      {% endfor %}
+    {% endif %}
+    </form>
+{% endblock %}
+
