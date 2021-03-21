@@ -9,9 +9,6 @@
     <p>Name: {{ my_name }}</p>
     <input name="username" id="username">
     <button type="submit" name="update_name" value="update_name">update</button>
-    <p>Phone Number: {{ my_phone }}</p>
-    <input name="phone_number" id="phone_number">
-    <button type="submit" name="update_phone" value="update_phone">update</button>
     <p>Password: </p>
     <input name="password" id="password">
     <button type="submit" name="update_pwd" value="update_pwd">update</button>
@@ -84,6 +81,7 @@
         <p>Restaurant: {{ r.res_name }}</p> 
         <p>Number of guests: {{ r.number_of_guests }}</p>
         <p>Date and Time: {{ r.datetime_scheduled }}</p>
+        <p>Status: {{ r.acceptance_status }}</p>
         <a href="/restaurant/{{r.res_id}}">
           <button>View Restaurant</button>
         </a>
