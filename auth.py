@@ -40,8 +40,18 @@ def customer_login_required(view):
 
     return wrapped_view
 
+#requires restaurant login
+def res_login_required(view):
+    """View decorator that redirects anonymous customer to the login page."""
 
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user_id is None or g.user_type!='restaurant':
+            return redirect(url_for("auth.res_login"))
 
+        return view(**kwargs)
+
+    return wrapped_view
 
 @bp.before_app_request
 def load_logged_in_user():
