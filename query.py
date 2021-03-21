@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 def search_res(conn,rname,city,cuisine,cost):
-    query = "SELECT rs.res_id, rs.res_name,avg(r.stars_value) as star,"\
+    query = "SELECT rs.res_id, rs.res_name,rs.avg_star,"\
             "rs.cost_category, ct.cuisine_name, c.city_name "\
-            "FROM restaurant rs, cuisine_type ct, serves_cuisine s, rating r,city c "\
+            "FROM restaurant rs, cuisine_type ct, serves_cuisine s, city c "\
             "WHERE rs.res_id = s.res_id AND ct.cuisine_id = s.cuisine_id "\
-            "  AND rs.res_id = r.res_id AND rs.res_name LIKE %s "\
+            "  AND rs.res_name LIKE %s "\
             "  AND rs.city_id = c.city_id AND c.city_name in %s "\
             "  AND ct.cuisine_name in %s AND rs.cost_category in %s "\
-            "GROUP BY rs.res_id, rs.res_name, rs.cost_category, ct.cuisine_name, c.city_name "\
-            "ORDER BY star desc;"
+            "ORDER BY rs.avg_star desc;"
     args = "%" + rname +"%", tuple(city), tuple(cuisine), tuple(cost)
     
     return conn.execute(query, args)
@@ -34,15 +33,13 @@ def fav_food(conn, uid):
     return conn.execute(query, args)
 
 def recommendation(conn, fav_food_id):
-    query ="SELECT rs.res_id, rs.res_name,avg(r.stars_value) as star,"\
+    query ="SELECT rs.res_id, rs.res_name,rs.avg_star,"\
             "rs.cost_category, ct.cuisine_name, c.city_name "\
-            "FROM restaurant rs, cuisine_type ct, serves_cuisine s, rating r,city c "\
+            "FROM restaurant rs, cuisine_type ct, serves_cuisine s, city c "\
             "WHERE rs.res_id = s.res_id AND ct.cuisine_id = s.cuisine_id "\
-            "  AND rs.res_id = r.res_id "\
             "  AND rs.city_id = c.city_id "\
             "  AND ct.cuisine_id = %s "\
-            "GROUP BY rs.res_id, rs.res_name, rs.cost_category, ct.cuisine_name, c.city_name "\
-            "ORDER BY star desc "\
+            "ORDER BY rs.avg_star desc "\
             "LIMIT 2;"
     
     return conn.execute(query, fav_food_id)
