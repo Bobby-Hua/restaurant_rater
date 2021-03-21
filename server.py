@@ -349,7 +349,12 @@ def my_profile_edit():
                                      '<button>Go Back</button></a></body><html>')
         else:
             friend_id = friend.customer_id
-            if ((conn.execute("SELECT customer_id_1 FROM friend_request WHERE customer_id_1 = %s AND " \
+            if friend_id == uid:
+                return render_template_string('<html><head></head><body>You cannot add yourself as a friend! '\
+                                              '<a href="/myprofile">'\
+                                              '<button>Go Back</button></a></body><html>')
+            
+            elif ((conn.execute("SELECT customer_id_1 FROM friend_request WHERE customer_id_1 = %s AND " \
                 "customer_id_2 = %s", uid, friend_id).fetchone() is None) and (conn.execute("SELECT customer_id_1 FROM friend_request WHERE customer_id_1 = %s AND " \
                 "customer_id_2 = %s", friend_id, uid).fetchone() is None)):      
                 conn.execute("INSERT INTO friend_request VALUES (%s, %s,'pending');", uid, friend_id)
