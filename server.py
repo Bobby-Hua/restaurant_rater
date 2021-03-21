@@ -373,8 +373,10 @@ def my_profile_edit():
 @app.route('/friendinfo/<fid>',methods=['GET'])
 @customer_login_required
 def friend_info(fid):
+    #fid is the id of the friend
      #favorites 
     conn=g.conn
+    fname=conn.execute("SELECT name FROM customer where customer_id=%s",fid).fetchone()['name']
     fav_res = []
     cursor = conn.execute("SELECT res_id FROM favorite_res WHERE customer_id = %s", fid)
     for result in cursor:
@@ -382,16 +384,16 @@ def friend_info(fid):
         fav_res.append(res_info)
     cursor.close()
     
-    reviews=conn.execute('SELECT res.res_name res_name resrati.res_id res_id rati.rating_id rating_id, text, likes, rati.stars_value stars_value '\
+    reviews=conn.execute('SELECT res.res_name res_name, rati.res_id res_id, rati.rating_id rating_id, text, likes, rati.stars_value stars_value '\
                          'FROM rating rati, review rev, restaurant res '\
                         'where rati.customer_id=%s AND rati.res_id=res.res_id '\
-                        ' AND rati.rating_id=rev.rating_id order by likes desc;',(customer_id,))
+                        ' AND rati.rating_id=rev.rating_id order by likes desc;',(fid,))
     all_reviews=[]
     for r in reviews:
         r_dict=dict(r)
         all_reviews.append(r_dict)
                
-    context=dict(res=res,reviews=all_reviews) 
+    context=dict(fname=fname, fav_res=fav_res,reviews=all_reviews) 
     
     return render_template('friend.html', **context)
     

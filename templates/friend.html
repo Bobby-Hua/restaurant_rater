@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+
+{% block content %}  
+
+   <h3>{{fname}}'s Favorites:</h3>
+    {% if fav_res ==[] %}
+        <p>{{fname}} doesn't have any favorite restaurants yet</p>
+    {% else %}
+      {% for r in fav_res %}
+      <p>
+      Name: {{r.res_name}}
+      <a href="/restaurant/{{r.res_id}}">
+      <button>see the restaurant</button>
+      </a>
+      </p>
+      {% endfor %}
+    {% endif %}
+    
+
+</table>
+   <h3>{{fname}}'s Reviews:</h3>
+{% if reviews ==[] %}
+        <p>{{fname}} hasn't written any reviews yet</p>
+    {% else %}
+<table border=1>
+<tr><td>
+        Restaurant Reviewed By This Friend
+    </td>
+    <td>
+        Review Text
+    </td>
+    <td>
+        stars
+    </td>
+    <td>
+        likes
+    </td>
+</tr>
+
+    {% for r in reviews %}
+        <tr>
+            <td>
+                {{r['res_name']}}
+            </td>
+            <td>
+                {{r['text']}}
+            </td>
+            <td>
+                {{r['stars_value']}}
+            </td>
+            <td>
+                {{r['likes']}}
+            </td>
+            <td>
+
+                <form action={{url_for("restaurant",res_id=r['res_id'])}}>
+                    <input type="submit" value="see the restaurant" />
+                </form>
+            </td>    
+        </tr>
+
+
+    {%endfor%}
+</table>
+    {% endif %}
+
+{% endblock %}  
