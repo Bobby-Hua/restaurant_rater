@@ -241,7 +241,6 @@ def my_profile():
     uid = session['user_id']
     my_info = conn.execute("SELECT * FROM customer WHERE customer_id = %s;", uid).fetchone()
     my_name = my_info['name']
-    my_phone = my_info['phone_num']
     my_pwd = my_info['password']
     
     #find liked food types
@@ -296,15 +295,14 @@ def my_profile():
     
     #reservation
     reservation = []
-    cursor = conn.execute("SELECT res_id, res_name, number_of_guests, datetime_scheduled "\
-                          "FROM reservation natural join restaurant WHERE customer_id = %s "\
-                          "AND acceptance_status = 'accepted'", uid)
+    cursor = conn.execute("SELECT res_id, res_name, number_of_guests, datetime_scheduled, acceptance_status "\
+                          "FROM reservation natural join restaurant WHERE customer_id = %s ", uid)
     for result in cursor:
         reservation.append(result)
     cursor.close()
     
 
-    context = dict(my_name = my_name, my_phone = my_phone, cuisine = cuisine,
+    context = dict(my_name = my_name, cuisine = cuisine,
                    my_pwd = my_pwd, fav_food = fav_food, friend = friend, request_info=request_info,
                    fav_res=fav_res,reservation = reservation)
     return render_template("myprofile.html", **context)
@@ -315,17 +313,12 @@ def my_profile_edit():
     conn = g.conn
     uid = session['user_id']
     name = request.form["username"]
-    phone = request.form["phone_number"]
     pwd = generate_password_hash(request.form["password"])
     fav_food = request.form.getlist("fav_food")
     friend_phone = request.form["friend_phone"]
         
     if request.form.get("update_name"):
         conn.execute("UPDATE customer SET name = %s WHERE customer_id = %s;", name, uid)
-        return redirect(url_for("my_profile"))
-            
-    elif request.form.get("update_phone"):
-        conn.execute("UPDATE customer SET phone_num = %s WHERE customer_id = %s;", phone, uid)
         return redirect(url_for("my_profile"))
         
     elif request.form.get("update_pwd"):
@@ -347,7 +340,7 @@ def my_profile_edit():
         
     elif request.form.get("reject_request"):
         req_id = request.form["reject_request"]
-        conn.execute("UPDATE friend_request SET request_status = 'rejected' WHERE customer_id_1 = %s AND "\
+        conn.execute("UPDATE friend_request SET request_status = 'declined' WHERE customer_id_1 = %s AND "\
                      "customer_id_2 = %s;", req_id, uid)
         return redirect(url_for("my_profile"))
         
@@ -373,7 +366,7 @@ def my_profile_edit():
                                               '<button>Go Back</button></a></body><html>')
                 
             else:        
-                return render_template_string('<html><head></head><body>There is already a request! '\
+                return render_template_string('<html><head></head><body>There was already a request! '\
                                               '<a href="/myprofile">'\
                                               '<button>Go Back</button></a></body><html>')
 
