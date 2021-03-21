@@ -18,6 +18,8 @@ from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
 import shortuuid
 import datetime
+import time
+
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
 app.secret_key = "26533228" 
@@ -515,15 +517,35 @@ def reserve(res_id):
     conn=g.conn
     customer_id=g.user_id
     context=dict(res_id=res_id)
+    
     if request.method=='POST':
-        reserv_id=shortuuid.uuid()
         guest_num=request.form["guest_num"]
-        datetime=request.form['datetime']
-        acceptance='pending'
-        conn.execute("INSERT INTO reservation VALUES (%s,%s,%s,%s,%s,%s)",
-                     reserv_id,guest_num,datetime,customer_id,res_id,acceptance)
+        date_time=request.form['datetime']
         
-        return render_template('revdone.html',**context)
+        error=None
+       
+        try: 
+            assert(int(guest_num)>0)
+        except:
+            error="Enter a proper number for guests"   
+        
+        
+        
+        try:
+            time.strptime(date_time,'%Y-%m-%d %H:%M')
+        except:
+            print('wrong date format')
+            error="Enter correctedly formatted date time"
+            
+        if error is None:
+            reserv_id=shortuuid.uuid()           
+           
+            acceptance='pending'
+            conn.execute("INSERT INTO reservation VALUES (%s,%s,%s,%s,%s,%s)",
+                         reserv_id,guest_num,date_time,customer_id,res_id,acceptance)
+            
+            return render_template('revdone.html',**context)
+        flash(error)
     
     return render_template('reservation.html', **context)
 
