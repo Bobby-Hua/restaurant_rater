@@ -146,8 +146,8 @@ def register_restaurant():
         password = request.form["password"]
        
         res_id=shortuuid.uuid() #generates a universally unique id; 22 chars
-        
-        args=res_id,name,addr,cost,city_id,description,generate_password_hash(password)
+        avg_star=0
+        args=res_id,name,addr,cost,city_id,description,generate_password_hash(password),avg_star
         error = None
 
 
@@ -177,8 +177,6 @@ def register_restaurant():
             
             return render_template("auth/resRegisterSuccess.html",res_id=res_id)
        
-        print('-'*30)
-        print(error)
 
         flash(error)
 

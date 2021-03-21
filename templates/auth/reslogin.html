@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <a href="/">
+    <button>Start Searching!</button>
+  </a>
+  <h1>{% block title %}Restaurant Login {% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="res_id">Restaurant ID</label>
+    <input name="res_id" id="res_id" required>
+    <label for="password">Password</label>
+    <input type="password" name="password" id="password" required>
+    <input type="submit" value="Log In">
+  </form>
+{% endblock %}
+

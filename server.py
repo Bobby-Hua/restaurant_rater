@@ -12,12 +12,12 @@ import os
   # accessible as a variable in index.html:
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, render_template_string, g, redirect, Response, url_for, session
+from flask import Flask, request, render_template, render_template_string, g, redirect, Response, url_for, session, flash
 import query
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
 import shortuuid
-
+import datetime
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
 app.secret_key = "26533228" 
@@ -235,6 +235,7 @@ def search_res():
 
 
 @app.route('/myprofile', methods = ['GET'])
+@customer_login_required
 def my_profile():
     conn = g.conn
     uid = session['user_id']
@@ -302,6 +303,7 @@ def my_profile():
     return render_template("myprofile.html", **context)
 
 @app.route('/myprofile', methods = ['POST'])
+@customer_login_required
 def my_profile_edit():
     conn = g.conn
     uid = session['user_id']
@@ -362,8 +364,32 @@ def my_profile_edit():
                 return render_template_string('<html><head></head><body>There is already a request! '\
                                               '<a href="/myprofile">'\
                                               '<button>Go Back</button></a></body><html>')
-                
-        
+
+@app.route('/friendinfo/<fid>',methods=['GET'])
+@customer_login_required
+def friend_info(fid):
+     #favorites 
+    conn=g.conn
+    fav_res = []
+    cursor = conn.execute("SELECT res_id FROM favorite_res WHERE customer_id = %s", fid)
+    for result in cursor:
+        res_info = conn.execute("SELECT * FROM restaurant WHERE res_id = %s", result.res_id).fetchone()
+        fav_res.append(res_info)
+    cursor.close()
+    
+    reviews=conn.execute('SELECT res.res_name res_name resrati.res_id res_id rati.rating_id rating_id, text, likes, rati.stars_value stars_value '\
+                         'FROM rating rati, review rev, restaurant res '\
+                        'where rati.customer_id=%s AND rati.res_id=res.res_id '\
+                        ' AND rati.rating_id=rev.rating_id order by likes desc;',(customer_id,))
+    all_reviews=[]
+    for r in reviews:
+        r_dict=dict(r)
+        all_reviews.append(r_dict)
+               
+    context=dict(res=res,reviews=all_reviews) 
+    
+    return render_template('friend.html', **context)
+    
 # =============================================================================
 # Restaurant Specific Functions
 # =============================================================================
@@ -390,6 +416,7 @@ def restaurant(res_id):
     return render_template('restaurant.html', **context)
 
 @app.route('/restaurant/<res_id>', methods =['POST'])
+@customer_login_required
 def restaurant_fav(res_id):
     conn=g.conn
     uid = session['user_id']
@@ -407,6 +434,57 @@ def restaurant_fav(res_id):
         return render_template_string('<html><head></head><body>This restaurant is already your favorite! '\
                                               '<a href="/myprofile">'\
                                               '<button>View in Favorites</button></a></body><html>')
+
+@app.route('/resreview/<res_id>', methods =['GET','POST'])
+@customer_login_required
+def rating_review(res_id):
+    conn=g.conn
+    customer_id=g.user_id
+    context=dict(res_id=res_id)
+    if request.method=='POST':
+        last_rating_date=conn.execute("select max(date_made) last_rating_date from rating "\
+                                      "where res_id=%s AND customer_id=%s",(res_id,customer_id)).fetchone()['last_rating_date']
+        print("="*60)
+        print(last_rating_date)
+        print(type(last_rating_date))
+   
+        # if last_rating_date and (datetime.date.today()-last_rating_date)<datetime.timedelta(days=30):
+        #     return render_template_string('<html><head></head><body>You made a rating to this restaurant less than 30 days ago.'\
+        #                                   'Wait for a bit longer to make another one '\
+        #                                 f'<a href="/restaurant/{res_id}">'\
+        #                                 '<button>Back to Restaurant</button></a></body><html>')
+    
+    
+            
+        rating_id=shortuuid.uuid()
+        stars=float(request.form['stars'])
+        date=datetime.date.today()
+        text=request.form['review']
+        
+        args= rating_id,stars,date,res_id,customer_id
+        print(rating_id)
+        
+        error = None
+        if not stars or (stars>5 or stars<1) :
+            error='Give a rating from 1-5'
+        
+        if error==None:
+            conn.execute("INSERT INTO rating VALUES(%s,%s,%s,%s,%s)",args)
+            new_avg=conn.execute('SELECT avg(stars_value) new_avg from rating r '\
+                          'WHERE r.res_id=%s',res_id).fetchone()['new_avg']
+            conn.execute("UPDATE restaurant SET avg_star=%s WHERE res_id=%s",(new_avg,res_id))
+            
+            if len(text.strip())>0:
+                conn.execute("INSERT INTO review VALUES(%s,%s,%s)",(rating_id,text,0))
+            return render_template_string('<html><head></head><body>Rating Submitted '\
+                                          f'<a href="/restaurant/{res_id}">'\
+                                          '<button>Back</button></a></body><html>')
+                
+        flash(error)
+    return render_template('ratingReview.html')
+
+    
+
 
 
 
@@ -434,7 +512,6 @@ def reserve(res_id):
         reserv_id=shortuuid.uuid()
         guest_num=request.form["guest_num"]
         datetime=request.form['datetime']
-        customer_id=g.user_id
         acceptance='pending'
         conn.execute("INSERT INTO reservation VALUES (%s,%s,%s,%s,%s,%s)",
                      reserv_id,guest_num,datetime,customer_id,res_id,acceptance)

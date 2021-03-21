@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Restaurant Registered Successfully{% endblock %}</h1>
+{% endblock %}
+
+
+
+{% block content %}  
+<body>Write down your restaurant ID, which is necessary for login: {{res_id}}</body>
+
+<form action={{url_for("auth.res_login")}}>
+<input type="submit" value="Restaurant Login" />
+
+{% endblock %}  

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <a href="/">
+    <button>Start Searching!</button>
+  </a>
+  <h1>{% block title %}Rating and Review{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="stars">Stars (1-5)</label>
+    <input name="stars" id="stars" required>
+
+    <label for="review">Review (Optional)</label>
+    <textarea id="review", name="review", rows="4" cols="50">
+    </textarea>
+     <br><br>
+    <input type="submit" value="submit">
+  </form>
+{% endblock %}

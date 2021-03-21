@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <a href="/">
+    <button>Share info about your restaurant</button>
+  </a>
+  <h1>{% block title %}Restaurant Register{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="username">Restaurant Name</label>
+    <input name="username" id="username" maxlength="50" required>
+    <label for="street_addr">Street addrress</label>
+    <input name="street_addr" id="street addrress" maxlength="70" required>
+    <label for="cost">Cost Category ($,$$,$$$,$$$$) </label>
+    <input name="cost" id="cost" maxlength="4" required>
+    <label for="Description">Description</label>
+    <input name="Description" id="Description" size="80" maxlength="5000" required>
+    
+    <div>Choose your city</div>
+    <div>
+    {%for c in cities%}
+    <label for={{c['city_id']}}>{{c['city_name']}} {{c['state_abbrev']}}</label>
+    <input type="radio" id={{c['city_id']}} value= {{c['city_id']}} name='city_id'>   
+    {% endfor %} 
+    </div>
+    
+    <label for="password">Password</label>
+    <input type="password" name="password" id="password" required>
+    <input type="submit" value="Customer_Register">
+    
+  </form>
+{% endblock %}
