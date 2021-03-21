@@ -24,7 +24,7 @@ app.secret_key = "26533228"
 
 # apply the blueprints to the app
 import auth
-from auth import customer_login_required
+from auth import customer_login_required, res_login_required
 app.register_blueprint(auth.bp)
 
 #
@@ -294,12 +294,19 @@ def my_profile():
         fav_res.append(res_info)
     cursor.close()
     
-    print(fav_res)
+    #reservation
+    reservation = []
+    cursor = conn.execute("SELECT res_id, res_name, number_of_guests, datetime_scheduled "\
+                          "FROM reservation natural join restaurant WHERE customer_id = %s "\
+                          "AND acceptance_status = 'accepted'", uid)
+    for result in cursor:
+        reservation.append(result)
+    cursor.close()
     
 
     context = dict(my_name = my_name, my_phone = my_phone, cuisine = cuisine,
                    my_pwd = my_pwd, fav_food = fav_food, friend = friend, request_info=request_info,
-                   fav_res=fav_res)
+                   fav_res=fav_res,reservation = reservation)
     return render_template("myprofile.html", **context)
 
 @app.route('/myprofile', methods = ['POST'])
@@ -526,7 +533,45 @@ def reserve(res_id):
         return render_template('revdone.html',**context)
     
     return render_template('reservation.html', **context)
+
+@app.route('/managerequests', methods = ['GET'])
+@res_login_required
+def view_reservation():
+    conn=g.conn
+    rid = session['user_id']
+    req_pending = []
+    cursor = conn.execute("SELECT * FROM reservation WHERE res_id = %s AND acceptance_status = 'pending'", rid)
+    for result in cursor:
+        req_pending.append(result)
+    cursor.close()
     
+    req_accepted = []
+    cursor = conn.execute("SELECT * FROM reservation WHERE res_id = %s AND acceptance_status = 'accepted'", rid)
+    for result in cursor:
+        req_accepted.append(result)
+    cursor.close()
+            
+    context = dict(req_pending = req_pending, req_accepted = req_accepted)
+    return render_template('managerequests.html', **context)
+
+    
+    
+@app.route('/managerequests', methods = ['POST'])
+@res_login_required
+def manage_reservation():
+    conn=g.conn
+    if request.form.get("accept_request"):
+        reserv_id = request.form["accept_request"]
+        conn.execute("UPDATE reservation SET acceptance_status = 'accepted' WHERE reserv_id = %s;", reserv_id)
+        return render_template_string('<html><head></head><body>Request successfully accepted! '\
+                                              '<a href="/managerequests">'\
+                                              '<button>Go Back</button></a></body><html>')
+    else:
+        reserv_id = request.form["reject_request"]
+        conn.execute("UPDATE reservation SET acceptance_status = 'declined' WHERE reserv_id = %s;", reserv_id)
+        return render_template_string('<html><head></head><body>Request successfully rejected! '\
+                                              '<a href="/managerequests">'\
+                                              '<button>Go Back</button></a></body><html>')
 
 
 # Example of adding new data to the database
