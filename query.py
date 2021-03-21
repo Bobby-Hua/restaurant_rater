@@ -4,7 +4,7 @@ def search_res(conn,rname,city,cuisine,cost):
             "rs.cost_category, ct.cuisine_name, c.city_name "\
             "FROM restaurant rs, cuisine_type ct, serves_cuisine s, city c "\
             "WHERE rs.res_id = s.res_id AND ct.cuisine_id = s.cuisine_id "\
-            "  AND rs.res_name LIKE %s "\
+            "  AND UPPER(rs.res_name) LIKE UPPER(%s) "\
             "  AND rs.city_id = c.city_id AND c.city_name in %s "\
             "  AND ct.cuisine_name in %s AND rs.cost_category in %s "\
             "ORDER BY rs.avg_star desc;"
