@@ -418,7 +418,6 @@ def restaurant(res_id):
         all_reviews.append(r_dict)
 
     city_state=conn.execute('SELECT * from city where city_id=%s',(res['city_id'],)).fetchone()
-    print(city_state)
     city_state=city_state['city_name']+' '+ city_state['state_abbrev']
     context=dict(res=res,city_state=city_state,reviews=all_reviews) 
 
@@ -429,9 +428,9 @@ def restaurant(res_id):
 def restaurant_fav(res_id):
     conn=g.conn
     uid = session['user_id']
-    print(uid)
+    #print(uid)
     fav_id = request.form["add_fav"]
-    print(fav_id)
+    #print(fav_id)
     if (conn.execute("SELECT * FROM favorite_res WHERE res_id = %s AND customer_id = %s", 
         fav_id, uid).fetchone() is None):
         
@@ -453,25 +452,19 @@ def rating_review(res_id):
     if request.method=='POST':
         last_rating_date=conn.execute("select max(date_made) last_rating_date from rating "\
                                       "where res_id=%s AND customer_id=%s",(res_id,customer_id)).fetchone()['last_rating_date']
-        print("="*60)
-        print(last_rating_date)
-        print(type(last_rating_date))
    
-        # if last_rating_date and (datetime.date.today()-last_rating_date)<datetime.timedelta(days=30):
-        #     return render_template_string('<html><head></head><body>You made a rating to this restaurant less than 30 days ago.'\
-        #                                   'Wait for a bit longer to make another one '\
-        #                                 f'<a href="/restaurant/{res_id}">'\
-        #                                 '<button>Back to Restaurant</button></a></body><html>')
-    
-    
+            
             
         rating_id=shortuuid.uuid()
-        stars=float(request.form['stars'])
+        stars=-1 #initialize with an improper value for error checking 
+        try:  
+            stars=float(request.form['stars'])
+        except:
+            stars=-1
         date=datetime.date.today()
         text=request.form['review']
         
         args= rating_id,stars,date,res_id,customer_id
-        print(rating_id)
         
         error = None
         if not stars or (stars>5 or stars<1) :
