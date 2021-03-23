@@ -453,7 +453,12 @@ def rating_review(res_id):
         last_rating_date=conn.execute("select max(date_made) last_rating_date from rating "\
                                       "where res_id=%s AND customer_id=%s",(res_id,customer_id)).fetchone()['last_rating_date']
    
-            
+        date=datetime.date.today()
+        if last_rating_date and (date-last_rating_date)<datetime.timedelta(days=30):
+            return render_template_string('<html><head></head><body>You made a rating to this restaurant less than 30 days ago.'\
+                                          'Wait for a bit longer to make another one '\
+                                        f'<a href="/restaurant/{res_id}">'\
+                                        '<button>Back to Restaurant</button></a></body><html>')
             
         rating_id=shortuuid.uuid()
         stars=-1 #initialize with an improper value for error checking 
@@ -461,7 +466,7 @@ def rating_review(res_id):
             stars=float(request.form['stars'])
         except:
             stars=-1
-        date=datetime.date.today()
+        
         text=request.form['review']
         
         args= rating_id,stars,date,res_id,customer_id
