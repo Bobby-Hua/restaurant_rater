@@ -181,7 +181,7 @@ def register_restaurant():
             # the login page
             conn.execute(
                 "INSERT INTO Restaurant "\
-                    "VALUES (%s, %s,%s,%s,%s,%s,%s)",
+                    "VALUES (%s,%s, %s,%s,%s,%s,%s,%s)",
                 args
             )
             

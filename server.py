@@ -324,7 +324,7 @@ def my_profile_edit():
         return redirect(url_for("my_profile"))
         
     elif request.form.get("update_pwd"):
-        conn.execute("UPDATE customer SET phone_num = %s WHERE customer_id = %s;", pwd, uid)
+        conn.execute("UPDATE customer SET password = %s WHERE customer_id = %s;", pwd, uid)
         return redirect(url_for("my_profile"))
         
     elif request.form.get("update_food"):
